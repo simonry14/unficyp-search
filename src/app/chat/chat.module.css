@@ -1,18 +1,20 @@
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+
+  
+ 
+  /* Header */
+  .header {
+    padding: 20px 0;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
   
-  .header {
-    padding: 1.5rem 0;
-    border-bottom: 1px solid #e5e5e5;
+  .headerWrapper {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
   }
   
   .logoContainer {
@@ -22,7 +24,8 @@
   
   .logo {
     width: 60px;
-    height: 60px;
+    height: auto;
+    margin-right: 15px;
   }
   
   .titleContainer {
@@ -81,7 +84,9 @@
     flex-direction: column;
     padding: 1rem 0;
     overflow: hidden;
-  }
+    width: 80%;         /* Set width to 80% */
+    margin: 0 auto;     /* Centers the div horizontally */
+}
   
   .chatContainer {
     flex: 1;
@@ -232,3 +237,74 @@
     background-color: #cccccc;
     cursor: not-allowed;
   }
+
+   /* Footer */
+   .footer {
+    background-color: #2d3c4d;
+    color: white;
+    margin-top: auto;
+  }
+  
+  .footerBottom {
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #a0a0a0;
+  }
+
+   /* Page Wrapper */
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Global Navigation Bar */
+.globalNav {
+  background-color: #004d8f;
+  color: white;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.navContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.navLeft, .navRight {
+  display: flex;
+  align-items: center;
+}
+
+.navLink {
+  color: white;
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+.navLink:hover {
+  text-decoration: underline;
+}
+
+.navDivider {
+  margin: 0 5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.languageSelector {
+  margin-left: 15px;
+}
+
+.langSelect {
+  background-color: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+}
