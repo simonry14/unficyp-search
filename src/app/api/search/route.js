@@ -30,7 +30,7 @@ export async function GET(request) {
   // Simulate API data
   return NextResponse.json({
     results: mockResults,
-    totalResults: query?.toLowerCase() === 'unctad' ? 30036 : 1500,
+    totalResults: query?.toLowerCase() === 'unficyp' ? 30036 : 1500,
     searchTime: 6.441,
     query
   });
