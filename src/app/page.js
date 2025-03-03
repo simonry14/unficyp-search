@@ -4,6 +4,7 @@ import { useState } from 'react';
 import styles from './page.module.css';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,32 +54,67 @@ export default function Home() {
   };
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <div className={styles.logoContainer}>
-          <img 
-            src="/un-logo.png" 
-            alt="United Nations Logo" 
-            className={styles.logo} 
-          />
-          <div className={styles.titleContainer}>
-            <h1 className={styles.mainTitle}>UNFICYP</h1>
-            <div className={styles.divider}></div>
-            <div className={styles.searchTitle}>
-              <h2>UNFICYP Search</h2>
-              <p>Enterprise Search Engine of the United Nations Peacekeeping Force in Cyprus</p>
+    <div className={styles.pageWrapper}>
+      {/* Global Navigation Header */}
+      <nav className={styles.globalNav}>
+        <div className={styles.navContainer}>
+          <div className={styles.navLeft}>
+            <Link href="https://www.un.org" className={styles.navLink}>
+              United Nations
+            </Link>
+            <span className={styles.navDivider}>|</span>
+            <Link href="https://peacekeeping.un.org" className={styles.navLink}>
+              UN Peacekeeping
+            </Link>
+          </div>
+          <div className={styles.navRight}>
+            <Link href="/login" className={styles.navLink}>
+              Login
+            </Link>
+            <div className={styles.languageSelector}>
+              <select className={styles.langSelect} defaultValue="en">
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="es">Español</option>
+                <option value="ar">العربية</option>
+                <option value="ru">Русский</option>
+                <option value="zh">中文</option>
+                <option value="el">Ελληνικά</option>
+                <option value="tr">Türkçe</option>
+              </select>
             </div>
           </div>
         </div>
-      </header>
+      </nav>
+
+      <header className={styles.header}>
+  <div className={styles.headerWrapper}>
+    <div className={styles.logoContainer}>
+      <img 
+        src="/un-logo.png" 
+        alt="United Nations Logo" 
+        className={styles.logo} 
+      />
+      <div className={styles.titleContainer}>
+        <h1 className={styles.mainTitle}>UNFICYP</h1>
+        <div className={styles.divider}></div>
+        <div className={styles.searchTitle}>
+          <h2>UNFICYP Search</h2>
+          <p>Enterprise Search Engine of the United Nations Peacekeeping Force in Cyprus</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
 
       <main className={styles.main}>
         <div className={styles.searchContainer}>
           <div className={styles.searchBox}>
-            <button className={styles.categoryButton}>
-              All
-              <span className={styles.arrow}>›</span>
-            </button>
+          { // <button className={styles.categoryButton}>
+             // All
+              //<span className={styles.arrow}>›</span>
+            //</button> 
+            }
             <div className={styles.inputWrapper}>
               <input
                 type="text"
@@ -96,8 +132,6 @@ export default function Home() {
                   ×
                 </button>
               )}
-
-
             </div>
 
             {searchResults.length > 0 && ( <button className={styles.helpButton} onClick={startAIChat} >AI</button>  )}
@@ -158,6 +192,13 @@ export default function Home() {
           )}
         </div>
       </main>
+
+        {/* Footer */}
+        <footer className={styles.footer}>
+        <div className={styles.footerBottom}>
+          <p>© {new Date().getFullYear()} United Nations. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
