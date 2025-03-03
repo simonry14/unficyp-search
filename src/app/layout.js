@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: 'Unite Search - Enterprise Search Engine',
-  description: 'Enterprise Search Engine of the United Nations',
+  title: 'UNFICYP Search - Enterprise AI Search Engine',
+  description: 'Enterprise Search Engine for UNFICYP',
 }
 
 export default function RootLayout({ children }) {
