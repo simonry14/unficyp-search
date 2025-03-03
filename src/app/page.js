@@ -1,101 +1,163 @@
-import Image from "next/image";
+'use client'
+
+import { useState } from 'react';
+import styles from './page.module.css';
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [resultStats, setResultStats] = useState(null);
+  const pathname = usePathname(); 
+  const router = useRouter(); // Correct way in App Router
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setIsLoading(true);
+    
+    try {
+      // Using the API route
+      const response = await fetch(`/api/search?query=${encodeURIComponent(searchQuery)}`);
+      const data = await response.json();
+      
+      setSearchResults(data.results || []);
+      setResultStats({
+        total: data.totalResults || 0,
+        time: data.searchTime || 0,
+        query: searchQuery
+      });
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    // Optional: You may want to clear results too when the user clears the search
+    // setSearchResults([]);
+  };
+
+  const startAIChat = () => {
+    // Navigate to chat page with query parameter if there's a search query
+    if (searchQuery.trim()) {
+      router.push(`/chat?initialMessage=${encodeURIComponent(searchQuery)}`);
+    } else {
+      router.push('/chat');
+    }
+  };
+
+  return (
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <div className={styles.logoContainer}>
+          <img 
+            src="/un-logo.png" 
+            alt="United Nations Logo" 
+            className={styles.logo} 
+          />
+          <div className={styles.titleContainer}>
+            <h1 className={styles.mainTitle}>UNFICYP</h1>
+            <div className={styles.divider}></div>
+            <div className={styles.searchTitle}>
+              <h2>UNFICYP Search</h2>
+              <p>Enterprise Search Engine of the United Nations Peacekeeping Force in Cyprus</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className={styles.main}>
+        <div className={styles.searchContainer}>
+          <div className={styles.searchBox}>
+            <button className={styles.categoryButton}>
+              All
+              <span className={styles.arrow}>›</span>
+            </button>
+            <div className={styles.inputWrapper}>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search"
+                className={styles.searchInput}
+              />
+              {searchQuery && (
+                <button 
+                  onClick={clearSearch} 
+                  className={styles.clearButton}
+                  aria-label="Clear search"
+                >
+                  ×
+                </button>
+              )}
+
+
+            </div>
+
+            {searchResults.length > 0 && ( <button className={styles.helpButton} onClick={startAIChat} >AI</button>  )}
+            <button className={styles.helpButton}>?</button>
+          </div>
+
+          {!searchResults.length && !isLoading && (
+            <div className={styles.welcomeMessage}>
+              <p>Welcome to the Enterprise Search engine for the United Nations Peacekeeping Force in Cyprus (UNFICYP). 
+                 
+              </p>
+              <div className={styles.buttonContainer}>
+                <button onClick={handleSearch} className={styles.actionButton}>Search</button>
+                <button onClick={startAIChat} className={styles.actionButton}>AI Chat</button>
+                <button className={styles.actionButton}>Help</button>
+              </div>
+            </div>
+          )}
+
+          {isLoading && <div className={styles.loading}>Loading...</div>}
+
+          {searchResults.length > 0 && (
+            <div className={styles.resultsContainer}>
+              <div className={styles.resultStats}>
+                Results 1 - {Math.min(10, searchResults.length)} of {resultStats.total} for {resultStats.query}. 
+                Search took {resultStats.time} seconds
+              </div>
+              
+              <div className={styles.resultControls}>
+                <div className={styles.sortControl}>
+                  <span>Sort By: Relevance</span>
+                  <span className={styles.dropdown}>▼</span>
+                </div>
+                <div className={styles.paginationControl}>
+                  <span>Items Per Page: 10</span>
+                  <span className={styles.dropdown}>▼</span>
+                </div>
+              </div>
+
+              <ul className={styles.resultsList}>
+                {searchResults.map((result, index) => (
+                  <li key={index} className={styles.resultItem}>
+                    <div className={styles.documentIcon}>📄</div>
+                    <div className={styles.resultContent}>
+                      <h3 className={styles.resultTitle}>
+                        <a href={result.url}>{result.title}</a>
+                      </h3>
+                      <p className={styles.resultDescription}>{result.description}</p>
+                      <div className={styles.resultMeta}>
+                        <p>Data Source: {result.dataSource}</p>
+                        <p>URL: <a href={result.url} className={styles.resultUrl}>{result.url}</a></p>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }

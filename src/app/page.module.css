@@ -1,0 +1,255 @@
+/* styles/Search.module.css */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  
+  .header {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #e5e5e5;
+  }
+  
+  .logoContainer {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .titleContainer {
+    display: flex;
+    align-items: center;
+    margin-left: 1rem;
+  }
+  
+  .mainTitle {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+    padding-right: 1rem;
+  }
+  
+  .divider {
+    width: 1px;
+    height: 50px;
+    background-color: #ccc;
+    margin: 0 1rem;
+  }
+  
+  .searchTitle {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .searchTitle h2 {
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: normal;
+  }
+  
+  .searchTitle p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #333;
+  }
+  
+  .main {
+    padding: 2rem 0;
+  }
+  
+  .searchContainer {
+    width: 100%;
+  }
+  
+  .searchBox {
+    display: flex;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  
+  .categoryButton {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #009edb;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .arrow {
+    margin-left: 0.5rem;
+    font-size: 1.2rem;
+  }
+  
+  .searchInput {
+    flex-grow: 1;
+    padding: 0.75rem;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+  }
+  
+  .helpButton {
+    padding: 0.75rem 1rem;
+    background: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #777;
+  }
+  
+  .welcomeMessage {
+    text-align: center;
+    margin: 3rem 0;
+  }
+  
+  .buttonContainer {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .actionButton {
+    padding: 0.5rem 1.5rem;
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    border-radius: 2px;
+    font-size: 0.9rem;
+  }
+  
+  .loading {
+    text-align: center;
+    margin: 2rem 0;
+    font-size: 1.2rem;
+    color: #555;
+  }
+  
+  .resultsContainer {
+    margin-top: 1.5rem;
+  }
+  
+  .resultStats {
+    font-size: 0.9rem;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  
+  .resultControls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .sortControl, 
+  .paginationControl {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .dropdown {
+    font-size: 0.7rem;
+  }
+  
+  .resultsList {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .resultItem {
+    display: flex;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .documentIcon {
+    margin-right: 1rem;
+    font-size: 1.5rem;
+  }
+  
+  .resultContent {
+    flex: 1;
+  }
+  
+  .resultTitle {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+  }
+  
+  .resultTitle a {
+    color: #0066cc;
+    text-decoration: none;
+  }
+  
+  .resultTitle a:hover {
+    text-decoration: underline;
+  }
+  
+  .resultDescription {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  .resultMeta {
+    font-size: 0.8rem;
+    color: #555;
+  }
+  
+  .resultMeta p {
+    margin: 0.25rem 0;
+  }
+  
+  .resultUrl {
+    color: #0066cc;
+    text-decoration: none;
+  }
+
+  .inputWrapper {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+  }
+  
+  .searchInput {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+  }
+  
+  .clearButton {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #777;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+  }
+  
+  .clearButton:hover {
+    background-color: #f0f0f0;
+  }
