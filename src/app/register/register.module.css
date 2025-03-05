@@ -1,0 +1,367 @@
+/* login.module.css */
+
+/* Page Wrapper */
+.pageWrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+  }
+  
+  /* Global Navigation Bar */
+  .globalNav {
+    background-color: #004d8f;
+    color: white;
+    padding: 8px 0;
+    font-size: 14px;
+  }
+  
+  .navContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .navLeft, .navRight {
+    display: flex;
+    align-items: center;
+  }
+  
+  .navLink {
+    color: white;
+    text-decoration: none;
+    margin: 0 10px;
+  }
+  
+  .navLink:hover {
+    text-decoration: underline;
+  }
+  
+  .navDivider {
+    margin: 0 5px;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .languageSelector {
+    margin-left: 15px;
+  }
+  
+  .langSelect {
+    background-color: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+  
+  .header {
+    padding: 20px 0;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .headerWrapper {
+    display: flex;
+    justify-content: center; /* This centers the content horizontally */
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .logoContainer {
+    display: flex;
+    align-items: center;
+    /* Remove any justify-content properties if they exist here */
+  }
+  
+  .logo {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .titleContainer {
+    display: flex;
+    align-items: center;
+    margin-left: 1rem;
+  }
+  
+  .mainTitle {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+    padding-right: 1rem;
+  }
+  
+  .divider {
+    width: 1px;
+    height: 50px;
+    background-color: #ccc;
+    margin: 0 1rem;
+  }
+  
+  .searchTitle {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .searchTitle h2 {
+    font-size: 18px;
+    margin: 0;
+    font-weight: 600;
+  }
+  
+  .searchTitle p {
+    font-size: 14px;
+    margin: 5px 0 0;
+    color: #666;
+  }
+  
+  /* Main Content */
+  .main {
+    flex: 1;
+    padding: 40px 20px;
+  }
+  
+  .loginContainer {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    gap: 30px;
+  }
+  
+  .loginCard {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    flex: 2;
+  }
+  
+  .loginHeader {
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+  }
+  
+  .loginHeader h2 {
+    font-size: 24px;
+    color: #004d8f;
+    margin: 0 0 8px 0;
+  }
+  
+  .loginHeader p {
+    color: #666;
+    margin: 0;
+  }
+  
+  .errorMessage {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    border-left: 4px solid #c62828;
+  }
+  
+  .loginForm {
+    margin-bottom: 20px;
+  }
+  
+  .formGroup {
+    margin-bottom: 20px;
+  }
+  
+  .formGroup label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .formInput {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+  }
+  
+  .formInput:focus {
+    outline: none;
+    border-color: #004d8f;
+    box-shadow: 0 0 0 2px rgba(0, 77, 143, 0.1);
+  }
+  
+  .formOptions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+  
+  .checkboxGroup {
+    display: flex;
+    align-items: center;
+  }
+  
+  .checkbox {
+    margin-right: 8px;
+  }
+  
+  .forgotPassword {
+    color: #004d8f;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  
+  .forgotPassword:hover {
+    text-decoration: underline;
+  }
+  
+  .loginButton {
+    width: 100%;
+    padding: 14px;
+    background-color: #004d8f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .loginButton:hover {
+    background-color: #003b6f;
+  }
+  
+  .loginButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .loginHelp {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .helpContact {
+    margin: 5px 0;
+  }
+  
+  .securityNotice {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #666;
+    text-align: center;
+  }
+  
+  .loginInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .infoCard {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  
+  .infoCard h3 {
+    font-size: 18px;
+    color: #004d8f;
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+  
+  .infoCard p {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+  
+  .infoLink {
+    display: inline-block;
+    color: #004d8f;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+  }
+  
+  .infoLink:hover {
+    text-decoration: underline;
+  }
+  
+  /* Footer */
+  .footer {
+    background-color: #2d3c4d;
+    color: white;
+    margin-top: auto;
+  }
+  
+  .footerBottom {
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #a0a0a0;
+  }
+  
+  .legalLinks {
+    margin-top: 10px;
+  }
+  
+  .legalLinks a {
+    color: #a0a0a0;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  .legalLinks a:hover {
+    color: #fff;
+  }
+  
+  .separator {
+    margin: 0 10px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .loginContainer {
+      flex-direction: column;
+    }
+    
+    .loginInfo {
+      flex-direction: row;
+    }
+    
+    .formOptions {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .forgotPassword {
+      margin-top: 10px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .loginInfo {
+      flex-direction: column;
+    }
+  }

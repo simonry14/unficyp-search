@@ -84,7 +84,7 @@
     flex-direction: column;
     padding: 1rem 0;
     overflow: hidden;
-    width: 80%;         /* Set width to 80% */
+    width: 100%;         /* Set width to 80% */
     margin: 0 auto;     /* Centers the div horizontally */
 }
   
@@ -95,6 +95,10 @@
     border: 1px solid #e5e5e5;
     border-radius: 8px;
     overflow: hidden;
+    padding-left: 20;
+    padding-right: 20;
+    margin-left: 20;
+    margin-right: 20;
   }
   
   .messagesContainer {
@@ -204,19 +208,22 @@
   
   .inputForm {
     display: flex;
+    justify-content: center; /* Center horizontally */
     padding: 1rem;
     background-color: #f9f9f9;
     border-top: 1px solid #e5e5e5;
   }
   
   .messageInput {
-    flex: 1;
+    width: 50%; /* Make it take up half the width */
+   
+    display: block; /* Ensure it respects margin auto */
     padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 0.9rem;
     outline: none;
-  }
+}
   
   .messageInput:focus {
     border-color: #009edb;
@@ -307,4 +314,70 @@
   padding: 3px 8px;
   border-radius: 3px;
   font-size: 12px;
+}
+
+
+
+.chatSidebar {
+  width: 250px;
+  background-color: #f4f4f4;
+  border-right: 1px solid #e0e0e0;
+  transition: transform 0.3s ease;
+  position: relative;
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+}
+
+.chatSidebar.open {
+  transform: translateX(0);
+}
+
+.sidebarToggle {
+  position: absolute;
+  right: -40px;
+  top: 10px;
+  background: #f4f4f4;
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  z-index: 10;
+}
+
+.chatList {
+  padding: 10px;
+}
+
+.newChatButton {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.chatItem {
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.chatItem:hover {
+  background-color: #e0e0e0;
+}
+
+.chatItem.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.chatItem small {
+  display: block;
+  font-size: 0.7em;
+  color: #666;
+}
+
+.main {
+  display: flex;
 }
