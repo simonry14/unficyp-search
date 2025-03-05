@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from './login.module.css';
 
+
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -15,68 +16,55 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Basic validation
     if (!username || !password) {
-      setError('Please enter both username and password');
-      return;
+        setError('Please enter both username and password');
+        return;
     }
-    
+
     setIsLoading(true);
     setError('');
-    
+
     try {
-      // This would be replaced with your actual authentication API call
-      const response = await mockAuthenticationRequest(username, password);
-      
-      if (response.success) {
-        // Store authentication token or session info
-        if (rememberMe) {
-          localStorage.setItem('unficyp_user', JSON.stringify({
-            username: username,
-            token: response.token
-          }));
-        } else {
-          sessionStorage.setItem('unficyp_user', JSON.stringify({
-            username: username,
-            token: response.token
-          }));
+        // Call the API to log in
+        const response = await fetch('/api/database', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ action: 'login', username, password })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            setError(result.message || 'Login failed');
+            return;
         }
-        
+
+        // Store authentication token or session info
+        const userData = {
+            userId: result.user.id,
+            username: result.user.username,
+            token: `user-token-${result.user.id}`
+        };
+
+        if (rememberMe) {
+            localStorage.setItem('unficyp_user', JSON.stringify(userData));
+        } else {
+            sessionStorage.setItem('unficyp_user', JSON.stringify(userData));
+        }
+
         // Redirect to home page or dashboard
         router.push('/');
-      } else {
-        setError(response.message || 'Authentication failed');
-      }
     } catch (error) {
-      setError('An error occurred during login. Please try again.');
-      console.error('Login error:', error);
+        setError('An error occurred during login. Please try again.');
+        console.error('Login error:', error);
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
-  
-  // Mock function to simulate authentication API
-  const mockAuthenticationRequest = async (username, password) => {
-    // Simulate network request
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // In production, this would be a real API call
-        if (username === 'demo' && password === 'password') {
-          resolve({
-            success: true,
-            token: 'sample-auth-token-12345',
-            message: 'Login successful'
-          });
-        } else {
-          resolve({
-            success: false,
-            message: 'Invalid username or password'
-          });
-        }
-      }, 1000); // Simulate 1s network delay
-    });
-  };
+};
 
   return (
     <div className={styles.pageWrapper}>
@@ -180,8 +168,8 @@ export default function Login() {
                   <label htmlFor="rememberMe">Remember me</label>
                 </div>
                 
-                <Link href="/forgot-password" className={styles.forgotPassword}>
-                  Forgot password?
+                <Link href="/register" className={styles.forgotPassword}>
+                  Register
                 </Link>
               </div>
               
@@ -204,16 +192,16 @@ export default function Login() {
           <div className={styles.loginInfo}>
             <div className={styles.infoCard}>
               <h3>New User?</h3>
-              <p>If you don't have an account and require access to UNFICYP Search, please contact your department administrator or IT support.</p>
-              <Link href="/contact" className={styles.infoLink}>
-                Contact Information
+              <p>If you don't have an account and require access to UNFICYP Search, please contact your IT support or click the link below to register.</p>
+              <Link href="/register" className={styles.infoLink}>
+                Register
               </Link>
             </div>
             
             <div className={styles.infoCard}>
               <h3>Security Notice</h3>
               <p>Please ensure you're accessing this site from a secure connection. Never share your login credentials with others.</p>
-              <Link href="/security-policy" className={styles.infoLink}>
+              <Link href="https://iseek-external.un.org/system/files/iseek/LibraryDocuments/1630-201303141106273998754.pdf" className={styles.infoLink}>
                 Security Policy
               </Link>
             </div>

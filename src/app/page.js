@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
@@ -11,8 +11,21 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [resultStats, setResultStats] = useState(null);
+  const [userName, setUserName] = useState('');
   const pathname = usePathname(); 
   const router = useRouter(); // Correct way in App Router
+
+   useEffect(() => {
+      const storedUser = localStorage.getItem('unficyp_user') || 
+                         sessionStorage.getItem('unficyp_user');
+                         
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        setUserName(user.username);
+      } else {
+        
+      }
+    }, []);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -53,6 +66,12 @@ export default function Home() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('unficyp_user');
+    sessionStorage.removeItem('unficyp_user');
+    window.location.href = '/login'; // Redirect to login page
+  };
+
   return (
     <div className={styles.pageWrapper}>
       {/* Global Navigation Header */}
@@ -68,9 +87,18 @@ export default function Home() {
             </Link>
           </div>
           <div className={styles.navRight}>
-            <Link href="/login" className={styles.navLink}>
-              Login
-            </Link>
+          {userName.length > 0 ? (
+  <>
+    Hi, {userName} |  
+    <button onClick={handleLogout} className={styles.navLink}>
+      Logout
+    </button>
+  </>
+) : (
+  <Link href="/login" className={styles.navLink}>
+    Login
+  </Link>
+)}
             <div className={styles.languageSelector}>
               <select className={styles.langSelect} defaultValue="en">
                 <option value="en">English</option>
