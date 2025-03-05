@@ -452,6 +452,7 @@ const handleAIResponse = async (userMessage, forcedChatId = null) => {
         <h2>UNFICYP AI Chat</h2>
         <p>AI-Powered Assistant for UNFICYP Resources</p>
         </div>
+        
       </div>
 
       <Link href="/" className={styles.backButton}>
