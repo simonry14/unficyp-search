@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './chat.module.css';
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 
 
 // Create a separate component that uses useSearchParams
@@ -22,7 +23,6 @@ function ChatContent() {
    // New state for chats management
    const [chats, setChats] = useState([]);
    const [currentChatId, setCurrentChatId] = useState(null);
-   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('unficyp_user') || 
@@ -38,11 +38,76 @@ function ChatContent() {
     }
   }, []);
 
-    useEffect(() => {
-    if (initialMessage && userId) {
-      handleSendMessage(new Event('submit'), initialMessage);
+  useEffect(() => {
+    const handleInitialMessage = async () => {
+      // Check if there's an initial message and user is logged in
+      if (initialMessage && userId) {
+        try {
+          // First, create a new chat
+          const chatResponse = await fetch('/api/database', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              action: 'createChat', 
+              userId, 
+              title: initialMessage.slice(0, 50) // Use first 50 chars as title
+            })
+          });
+          
+          const chatData = await chatResponse.json();
+          
+          if (chatData.success) {
+            const newChatId = chatData.chatId;
+            
+            // Update chats list with the new chat
+            setChats(prev => [
+              { 
+                id: newChatId, 
+                title: chatData.title, 
+                createdAt: new Date().toISOString() 
+              }, 
+              ...prev
+            ]);
+            
+            // Explicitly set current chat to the new chat
+            setCurrentChatId(newChatId);
+            
+            // Add initial message as a user message
+            const userMessage = { 
+              text: initialMessage, 
+              isUser: true, 
+              timestamp: new Date().toISOString() 
+            };
+            
+            // Save user message to database
+            await fetch('/api/database', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                action: 'addMessage', 
+                userId, 
+                chatId: newChatId, 
+                messageText: initialMessage, 
+                isAiMessage: false 
+              })
+            });
+            
+            // Update messages state
+            setMessages([userMessage]);
+            
+            // Trigger AI response, passing the chatId explicitly if needed
+            await handleAIResponse(initialMessage, newChatId);
+          }
+        } catch (error) {
+          console.error('Error handling initial message:', error);
+        }
+      }
+    };
+  
+    // Only run if userId is set
+    if (userId) {
+      handleInitialMessage();
     }
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [initialMessage, userId]);
 
   const fetchUserChats = async (userId) => {
@@ -55,6 +120,7 @@ function ChatContent() {
       const data = await response.json();
       if (data.success) {
         setChats(data.chats);
+        console.log(chats.length)
         if (data.chats.length > 0) {
           loadChat(data.chats[0].id);
         }
@@ -74,11 +140,20 @@ function ChatContent() {
       });
       const data = await response.json();
       if (data.success) {
-        setMessages(data.messages.map(msg => ({
+        const loadedMessages = data.messages.map(msg => ({
           text: msg.text,
           isUser: !msg.isAiMessage,
           timestamp: msg.timestamp
-        })));
+        }));
+        
+        setMessages(loadedMessages);
+        
+        // Scroll to bottom after messages are loaded
+        setTimeout(() => {
+          if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
       }
     } catch (error) {
       console.error('Error loading chat:', error);
@@ -102,93 +177,212 @@ function ChatContent() {
     }
   };
 
-  const fetchChatHistoryOLD = async (userId) => {
-    try {
-      const response = await fetch('/api/database', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'getMessages', userId })
-      });
-      const data = await response.json();
-      if (data.success) {
-        setMessages(data.messages.map(msg => ({
-          text: msg.text,
-          isUser: !msg.isAiMessage,
-          timestamp: msg.timestamp
-        })));
-      }
-    } catch (error) {
-      console.error('Error fetching chat history:', error);
-    }
-  };
-
-  const saveChatMessageOLD = async (message, isUser) => {
-    if (!userId) return;
-    await fetch('/api/database', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'addMessage', userId, messageText: message, isAiMessage: !isUser })
-    });
-  };
 
   const saveChatMessage = async (message, isUser) => {
     if (!currentChatId) return;
     await fetch('/api/database', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'addMessage', chatId: currentChatId, messageText: message, isAiMessage: !isUser })
+      body: JSON.stringify({ action: 'addMessage',userId, chatId: currentChatId, messageText: message, isAiMessage: !isUser })
     });
   };
 
-  const handleSendMessage = async (e, initialMsg = null) => {
+  const handleSendMessageOLD = async (e, initialMsg = null) => {
     e.preventDefault();
     const messageText = initialMsg || input;
     if (!messageText.trim()) return;
-    
-    const newMessage = { text: messageText, isUser: true, timestamp: new Date().toISOString() };
-    setMessages(prev => [...prev, newMessage]);
+
+    // Add user message to state
+    const userMessage = { text: messageText, isUser: true, timestamp: new Date().toISOString() };
+    setMessages(prev => [...prev, userMessage]);
+
     setInput('');
+
+    //save user message in db
     await saveChatMessage(messageText, true);
+
+    // Call AI response handler
     await handleAIResponse(messageText);
-  };
+    
+};
 
-  const handleAIResponseOLD = async (userMessage) => {
-    setIsLoading(true);
+const handleSendMessage = async (e, initialMsg = null) => {
+  e.preventDefault();
+  const messageText = initialMsg || input;
+  if (!messageText.trim()) return;
+
+  // If no current chat, create a new one
+  let chatId = currentChatId;
+  if (!chatId) {
     try {
-      const response = await fetch('/api/chat', {
+      // Create a new chat
+      const chatResponse = await fetch('/api/database', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage, context: messages.slice(-5) })
+        body: JSON.stringify({ 
+          action: 'createChat', 
+          userId, 
+          title: 'New Chat' // Temporary title
+        })
       });
-      const data = await response.json();
-      const aiResponse = { text: data.response, isUser: false, timestamp: new Date().toISOString() };
-      setMessages(prev => [...prev, aiResponse]);
-      await saveChatMessage(aiResponse.text, false);
+      
+      const chatData = await chatResponse.json();
+      
+      if (chatData.success) {
+        chatId = chatData.chatId;
+        
+        // Update chats list with the new chat
+        setChats(prev => [
+          { 
+            id: chatId, 
+            title: 'New Chat', 
+            createdAt: new Date().toISOString() 
+          }, 
+          ...prev
+        ]);
+        
+        // Set current chat to the new chat
+        setCurrentChatId(chatId);
+      }
     } catch (error) {
-      console.error('Error getting AI response:', error);
-    } finally {
-      setIsLoading(false);
+      console.error('Error creating new chat:', error);
+      return;
     }
-  };
+  }
 
-  const handleAIResponse = async (userMessage) => {
-    setIsLoading(true);
+  // Add user message to state
+  const userMessage = { text: messageText, isUser: true, timestamp: new Date().toISOString() };
+  setMessages(prev => [...prev, userMessage]);
+
+  // Clear input
+  setInput('');
+
+  // Save user message in db
+  await fetch('/api/database', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      action: 'addMessage', 
+      userId, 
+      chatId, 
+      messageText, 
+      isAiMessage: false 
+    })
+  });
+
+  // if this is the first message, update title
+  if (messages.length === 0) {
+    //await updateChatTitle(messages[0].text, chatId);
     try {
-      const response = await fetch('/api/chat', {
+      await fetch('/api/database', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage, context: messages.slice(-5) })
+        body: JSON.stringify({ 
+          action: 'updateChatTitle', 
+          chatId, 
+          title: messageText.slice(0, 50) 
+        })
       });
-      const data = await response.json();
-      const aiResponse = { text: data.response, isUser: false, timestamp: new Date().toISOString() };
-      setMessages(prev => [...prev, aiResponse]);
-      await saveChatMessage(aiResponse.text, false);
+  
+      // Update local state to reflect new title
+      setChats(prev => prev.map(chat => 
+        chat.id === chatId 
+          ? { ...chat, title: messageText.slice(0, 50) } 
+          : chat
+      ));
     } catch (error) {
-      console.error('Error getting AI response:', error);
-    } finally {
-      setIsLoading(false);
+      console.error('Error updating chat title:', error);
     }
-  };
+  }
+
+
+
+  // Call AI response handler
+  await handleAIResponse(messageText, chatId);
+};
+
+
+const handleAIResponse = async (userMessage, forcedChatId = null) => {
+  setIsLoading(true);
+
+  // Use the forced chatId or fall back to currentChatId
+  const chatId = forcedChatId || currentChatId;
+
+  if (!chatId) {
+    console.error('No chat ID available for AI response');
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+      const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userMessage, context: messages.slice(-5) })
+      });
+
+      if (!response.body) throw new Error("No response body");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let aiResponseText = "";
+      
+      // Add empty AI response placeholder
+      const aiResponse = { text: "", isUser: false, timestamp: new Date().toISOString() };
+      setMessages(prev => [...prev, aiResponse]);
+
+      while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          aiResponseText += chunk;
+
+          setMessages(prevMessages => {
+              const updatedMessages = [...prevMessages];
+              updatedMessages[updatedMessages.length - 1] = { 
+                  ...aiResponse, 
+                  text: aiResponseText 
+              };
+              return updatedMessages;
+          });
+      }
+
+      // Ensure aiResponseText is trimmed and not empty before saving
+      if (aiResponseText.trim()) {
+        console.log('Saving AI response:', {
+          chatId,
+          userId,
+          aiResponseText,
+          timestamp: new Date().toISOString()
+        });
+
+        // Save AI response to database
+        const saveResponse = await fetch('/api/database', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            action: 'addMessage', 
+            userId, 
+            chatId, 
+            messageText: aiResponseText, 
+            isAiMessage: true 
+          })
+        });
+
+        const saveResult = await saveResponse.json();
+        console.log('AI message save result:', saveResult);
+
+        if (!saveResult.success) {
+          console.error('Failed to save AI message');
+        }
+      }
+  } catch (error) {
+      console.error('Error getting AI response:', error);
+  } finally {
+      setIsLoading(false);
+  }
+};
+
 
   const handleLogout = () => {
     localStorage.removeItem('unficyp_user');
@@ -243,6 +437,7 @@ function ChatContent() {
       </nav>
 
       <header className={styles.header}>
+      
   <div className={styles.headerWrapper}>
     <div className={styles.logoContainer}>
       <img 
@@ -258,21 +453,26 @@ function ChatContent() {
         <p>AI-Powered Assistant for UNFICYP Resources</p>
         </div>
       </div>
+
+      <Link href="/" className={styles.backButton}>
+        Back to Search
+      </Link>
+
     </div>
+    
+    
   </div>
+
+
+  
 </header>
 
 
  
 <main className={styles.main}>
 
-<div className={`${styles.chatSidebar} ${isSidebarOpen ? styles.open : ''}`}>
-          <button 
-            className={styles.sidebarToggle} 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          >
-            {isSidebarOpen ? '←' : '→'}
-          </button>
+<div className={`${styles.chatSidebar}`}>
+       
           
           <div className={styles.chatList}>
             <button 
@@ -305,8 +505,8 @@ function ChatContent() {
             ) : (
               messages.map((message, index) => (
               <div key={index} className={`${styles.message} ${message.isUser ? styles.userMessage : styles.aiMessage}`}>
-                 <span className={styles.messageSender}>{message.isUser ? 'You' : 'UNFICYP AI'}</span>
-                <p>{message.text}</p>
+                 <span className={styles.messageSender}>{message.isUser ? '' : 'UNFICYP AI'}</span>
+                <ReactMarkdown>{message.text}</ReactMarkdown>
                 <span className={styles.timestamp}>{new Date(message.timestamp).toLocaleTimeString()}</span>
               </div>
             ))

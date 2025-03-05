@@ -28,8 +28,8 @@ export async function POST(req) {
       content: message
     });
 
-    // Call OpenAI API
-    const completion = await openai.chat.completions.create({
+    // Call OpenAI API with streaming enabled
+    const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini",  //model: "deepseek-chat",
       messages: [
         {
@@ -39,21 +39,34 @@ export async function POST(req) {
         ...conversationHistory
       ],
       max_tokens: 400,
-      temperature: 0.7
+      temperature: 0.7,
+      stream: true // Enable streaming
     });
 
-    // Extract the response
-    const aiResponse = completion.choices[0].message.content.trim();
+    // Set response headers for streaming
+    const encoder = new TextEncoder();
+    const streamResponse = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of stream) {
+          const text = chunk.choices[0]?.delta?.content || "";
+          controller.enqueue(encoder.encode(text));
+        }
+        controller.close();
+      }
+    });
 
-    // Return the response
-    return NextResponse.json({ 
-      response: aiResponse 
+    return new NextResponse(streamResponse, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      }
     });
 
   } catch (error) {
     console.error('OpenAI API Error:', error);
-    return NextResponse.json({ 
-      error: 'Failed to generate response' 
+    return NextResponse.json({
+      error: 'Failed to generate response'
     }, { status: 500 });
   }
 }

@@ -68,10 +68,12 @@ export async function POST(req) {
         return await createNewChat(body);
       case 'addMessage':
         return await addChatMessage(body);
-      case 'getUserChats':
-        return await getUserChats(body);
-      case 'getChatMessages':
-        return await getChatMessages(body);
+      case 'getChats':
+        return await getChats(body);
+      case 'getMessages':
+        return await getMessages(body);
+      case 'updateChatTitle':
+        return await updateChatTitle(body);
       default:
         return NextResponse.json({ 
           success: false, 
@@ -88,11 +90,78 @@ export async function POST(req) {
 }
 
 // Existing registerUser and loginUser functions remain unchanged
+async function registerUser(body) {
+  try {
+    const db = initializeDatabase();
+    const { username, password, salt } = body; // Use body instead of req.json()
+
+    const insertUser = db.prepare(`
+      INSERT INTO users (username, password, salt) 
+      VALUES (?, ?, ?)
+    `);
+
+    const result = insertUser.run(username, password, salt);
+
+    return NextResponse.json({ 
+      success: true, 
+      userId: result.lastInsertRowid 
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    return NextResponse.json({ 
+      success: false, 
+      message: error.code === 'SQLITE_CONSTRAINT_UNIQUE' 
+        ? 'Username already exists' 
+        : 'Registration failed' 
+    }, { status: 400 });
+  }
+}
+
+async function loginUser(body) {
+  try {
+    const db = initializeDatabase();
+    const { username, password } = body;
+
+    const userQuery = db.prepare('SELECT * FROM users WHERE username = ?');
+    const user = userQuery.get(username);
+
+    if (!user) {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'User not found' 
+      }, { status: 404 });
+    }
+
+    // Verify password
+    const isPasswordValid = verifyPassword(user.password, user.salt, password);
+
+    if (!isPasswordValid) {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Invalid password' 
+      }, { status: 401 });
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      user: { 
+        id: user.id, 
+        username: user.username 
+      } 
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    return NextResponse.json({ 
+      success: false, 
+      message: 'Login failed' 
+    }, { status: 500 });
+  }
+}
 
 async function createNewChat(body) {
   try {
     const db = initializeDatabase();
-    const { userId, title = 'New Chat' } = body;
+    const { userId, title } = body;
 
     const createChat = db.prepare(`
       INSERT INTO chats (user_id, title) 
@@ -119,6 +188,7 @@ async function addChatMessage(body) {
   try {
     const db = initializeDatabase();
     const { userId, chatId, messageText, isAiMessage } = body;
+    console.log(body);
 
     // Update last_active timestamp for the chat
     db.prepare(`
@@ -147,7 +217,7 @@ async function addChatMessage(body) {
   }
 }
 
-async function getUserChats(body) {
+async function getChats(body) {
   try {
     const db = initializeDatabase();
     const { userId } = body;
@@ -160,6 +230,7 @@ async function getUserChats(body) {
     `);
 
     const chats = getChats.all(userId);
+    console.log(chats);
 
     return NextResponse.json({ 
       success: true, 
@@ -167,7 +238,7 @@ async function getUserChats(body) {
         id: chat.id,
         title: chat.title,
         createdAt: chat.created_at,
-        lastActive: chat.last_active
+        lastUpdated: chat.last_active
       }))
     });
   } catch (error) {
@@ -179,7 +250,7 @@ async function getUserChats(body) {
   }
 }
 
-async function getChatMessages(body) {
+async function getMessages(body) {
   try {
     const db = initializeDatabase();
     const { chatId } = body;
@@ -206,6 +277,32 @@ async function getChatMessages(body) {
     return NextResponse.json({ 
       success: false, 
       message: 'Failed to retrieve chat messages' 
+    }, { status: 500 });
+  }
+}
+
+async function updateChatTitle(body) {
+  try {
+    const db = initializeDatabase();
+    const { chatId, title } = body;
+
+    const updateTitle = db.prepare(`
+      UPDATE chats 
+      SET title = ? 
+      WHERE id = ?
+    `);
+
+    updateTitle.run(title, chatId);
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Chat title updated'
+    });
+  } catch (error) {
+    console.error('Update chat title error:', error);
+    return NextResponse.json({ 
+      success: false, 
+      message: 'Failed to update chat title' 
     }, { status: 500 });
   }
 }
